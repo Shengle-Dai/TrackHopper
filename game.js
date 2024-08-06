@@ -8,7 +8,6 @@ let cart = {
     height: 20,
     dy: 0,
     gravity: 0.5,
-    jumpVelocity: 10,
     onTrack: true
 };
 
@@ -17,6 +16,8 @@ let gameOver = false;
 let trackSegments = [];
 let segmentWidth = 50;
 let spacePressed = false;
+let jumping = false;
+let jumpingStart = 0;
 
 // Initialize track segments
 for (let i = 0; i < canvas.width / segmentWidth; i++) {
@@ -39,13 +40,18 @@ function handleKeyDown(e) {
 function handleKeyUp(e) {
     if (e.code === 'Space') {
         spacePressed = false;
+        jumping = false;
     }
 }
 
 function jump() {
     if (cart.onTrack && spacePressed) {
-        cart.dy = -cart.jumpVelocity;
+        jumping = true;
         cart.onTrack = false;
+        jumpStart = performance.now();
+    }
+    if (!cart.onTrack && spacePressed && jumping && performance.now() - jumpStart < 200) {
+        cart.dy = cart.dy - 1;
     }
 }
 
