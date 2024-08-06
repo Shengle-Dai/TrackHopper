@@ -35,6 +35,9 @@ function handleKeyDown(e) {
     if (e.code === 'Space') {
         spacePressed = true;
     }
+    else if (e.code === 'KeyR' && gameOver) {
+        restartGame();
+    }
 }
 
 function handleKeyUp(e) {
@@ -130,8 +133,36 @@ function draw() {
     ctx.fillText(`Score: ${score}`, 10, 20);
 
     if (gameOver) {
-        ctx.fillText('Game Over', 350, 200);
+        ctx.fillText('Game Over - Press R to Restart', 300, 200);
     }
+}
+
+function restartGame() {
+    // Reset cart position and state
+    cart.x = 50;
+    cart.y = 300;
+    cart.dy = 0;
+    cart.onTrack = true;
+
+    // Reset game state
+    score = 0;
+    gameOver = false;
+    spacePressed = false;
+    jumping = false;
+    jumpingStart = 0;
+
+    // Reset track segments
+    trackSegments = [];
+    for (let i = 0; i < canvas.width / segmentWidth; i++) {
+        if (i < 10) {
+            trackSegments.push({ x: i * segmentWidth, y: 300 });
+        } else {
+            pushNewSegment();
+        }
+    }
+
+    // Start the game loop again
+    update();
 }
 
 update();
