@@ -16,6 +16,7 @@ let gameOver = false;
 let trackSegments = [];
 let segmentWidth = 50;
 let spacePressed = false;
+let initJumpSpeed = 3;
 let jumping = false;
 let jumpingStart = 0;
 
@@ -35,7 +36,7 @@ function handleKeyDown(e) {
     if (e.code === 'Space') {
         spacePressed = true;
     }
-    else if (e.code === 'KeyR' && gameOver) {
+    if (e.code === 'Space' && gameOver) {
         restartGame();
     }
 }
@@ -51,7 +52,8 @@ function jump() {
     if (cart.onTrack && spacePressed) {
         jumping = true;
         cart.onTrack = false;
-        jumpStart = performance.now();
+        cart.dy = -initJumpSpeed;
+        jumpStart = performance.now(); 
     }
     if (!cart.onTrack && spacePressed && jumping && performance.now() - jumpStart < 200) {
         cart.dy = cart.dy - 1;
@@ -88,7 +90,7 @@ function update() {
     cart.onTrack = false;
     for (let segment of trackSegments) {
         if (cart.x + cart.width > segment.x && cart.x < segment.x + segmentWidth &&
-            cart.y + cart.dy >= segment.y && cart.y <= segment.y && cart.dy >= 0) { 
+            cart.y + (2 * cart.dy) >= segment.y && cart.y <= segment.y && cart.dy >= 0) { 
                 cart.y = segment.y;
                 cart.dy = 0;
                 cart.onTrack = true;
@@ -112,8 +114,9 @@ function pushNewSegment() {
     } else {
         let diff = Math.random() * 100 - 50;
         let newY = (diff > -20 && diff < 20) ? lastSegment.y : lastSegment.y + diff;
+        let newX = (diff > -20 && diff < 20) ? lastSegment.x + segmentWidth : lastSegment.x + (2 * segmentWidth);
         newY = Math.max(200, Math.min(350, newY));
-        trackSegments.push({ x: lastSegment.x + segmentWidth, y: newY });
+        trackSegments.push({ x: newX, y: newY });
     }
 }
 
@@ -139,7 +142,7 @@ function draw() {
     ctx.fillText(`Score: ${score}`, 10, 20);
 
     if (gameOver) {
-        ctx.fillText('Game Over - Press R to Restart', 300, 200);
+        ctx.fillText('Game Over - Press Space to Restart', 300, 200);
     }
 }
 
