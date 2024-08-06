@@ -74,7 +74,7 @@ function update() {
 
     // Move track segments
     for (let segment of trackSegments) {
-        segment.x -= 3;
+        segment.x -= 5;
     }
 
     // Remove the leftmost segment and add a new one when needed
@@ -105,10 +105,16 @@ function update() {
 
 function pushNewSegment() {
     let lastSegment = trackSegments[trackSegments.length - 1];
-    let diff = Math.random() * 100 - 50;
-    let newY = (diff > -20 && diff < 20) ? lastSegment.y : lastSegment.y + diff;
-    newY = Math.max(200, Math.min(350, newY));
-    trackSegments.push({ x: lastSegment.x + segmentWidth, y: newY });
+    let gapChance = Math.random();
+
+    if (gapChance < 0.2) {
+        trackSegments.push({ x: lastSegment.x + (2 * segmentWidth), y: lastSegment.y });
+    } else {
+        let diff = Math.random() * 100 - 50;
+        let newY = (diff > -20 && diff < 20) ? lastSegment.y : lastSegment.y + diff;
+        newY = Math.max(200, Math.min(350, newY));
+        trackSegments.push({ x: lastSegment.x + segmentWidth, y: newY });
+    }
 }
 
 function draw() {
