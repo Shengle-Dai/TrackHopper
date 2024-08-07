@@ -2,7 +2,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 let cart = {
-    x: 50,
+    x: 100,
     y: 300,
     width: 20,
     height: 20,
@@ -17,6 +17,7 @@ let trackSegments = [];
 let segmentWidth = 50;
 let spacePressed = false;
 let initJumpSpeed = 3;
+let maxVerticalSpeed = 8;
 let jumping = false;
 let jumpingStart = 0;
 
@@ -52,11 +53,15 @@ function jump() {
     if (cart.onTrack && spacePressed) {
         jumping = true;
         cart.onTrack = false;
-        cart.dy = -initJumpSpeed;
         jumpStart = performance.now(); 
     }
-    if (!cart.onTrack && spacePressed && jumping && performance.now() - jumpStart < 200) {
-        cart.dy = cart.dy - 1;
+    if (!cart.onTrack && spacePressed && jumping && performance.now() - jumpStart < 100) {
+        if (cart.dy > -maxVerticalSpeed) {
+            cart.dy -= 2;
+        }
+        else {
+            cart.dy = -maxVerticalSpeed;
+        }
     }
 }
 
@@ -67,7 +72,12 @@ function update() {
     cart.y += cart.dy;
 
     if (!cart.onTrack && cart.y < canvas.height) {
-        cart.dy += cart.gravity; 
+        if (cart.dy < maxVerticalSpeed) {
+            cart.dy += cart.gravity;
+        }
+        else {
+            cart.dy = maxVerticalSpeed;
+        }    
     }
 
     if (cart.y > canvas.height) {
@@ -76,7 +86,7 @@ function update() {
 
     // Move track segments
     for (let segment of trackSegments) {
-        segment.x -= 5;
+        segment.x -= 3;
     }
 
     // Remove the leftmost segment and add a new one when needed
@@ -89,7 +99,7 @@ function update() {
     // Check if cart is on track
     cart.onTrack = false;
     for (let segment of trackSegments) {
-        if (cart.x + cart.width > segment.x && cart.x < segment.x + segmentWidth &&
+        if (((cart.x + cart.width > segment.x && cart.x + cart.width < segment.x + segmentWidth) || (cart.x > segment.x && cart.x < segment.x + segmentWidth)) &&
             cart.y + (2 * cart.dy) >= segment.y && cart.y <= segment.y && cart.dy >= 0) { 
                 cart.y = segment.y;
                 cart.dy = 0;
@@ -110,13 +120,10 @@ function pushNewSegment() {
     let gapChance = Math.random();
 
     if (gapChance < 0.2) {
-        trackSegments.push({ x: lastSegment.x + (2 * segmentWidth), y: lastSegment.y });
+        let newY = lastSegment.y + Math.random() * 100 - 50;
+        trackSegments.push({ x: lastSegment.x + (2 * segmentWidth), y: Math.max(100, Math.min(newY, 400)) });
     } else {
-        let diff = Math.random() * 100 - 50;
-        let newY = (diff > -20 && diff < 20) ? lastSegment.y : lastSegment.y + diff;
-        let newX = (diff > -20 && diff < 20) ? lastSegment.x + segmentWidth : lastSegment.x + (2 * segmentWidth);
-        newY = Math.max(200, Math.min(350, newY));
-        trackSegments.push({ x: newX, y: newY });
+        trackSegments.push({ x: lastSegment.x + segmentWidth, y: lastSegment.y });
     }
 }
 
