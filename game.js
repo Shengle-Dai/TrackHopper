@@ -4,8 +4,8 @@ const ctx = canvas.getContext('2d');
 let cart = {
     x: 100,
     y: 300,
-    width: 20,
-    height: 20,
+    width: canvas.width / 40,
+    height: canvas.height / 40,
     dy: 0,
     gravity: 0.5,
     onTrack: true
@@ -14,12 +14,12 @@ let cart = {
 let score = 0;
 let gameOver = false;
 let trackSegments = [];
-let segmentWidth = 50;
+let segmentWidth = canvas.width / 10;
 let spacePressed = false;
-let initJumpSpeed = 3;
-let maxVerticalSpeed = 8;
+let maxVerticalSpeed = canvas.height / 100;
 let jumping = false;
-let jumpingStart = 0;
+let jumpingStartHeight = cart.y;
+let forceFall = false;
 
 // Initialize track segments
 for (let i = 0; i < canvas.width / segmentWidth; i++) {
@@ -53,11 +53,16 @@ function jump() {
     if (cart.onTrack && spacePressed) {
         jumping = true;
         cart.onTrack = false;
-        jumpStart = performance.now(); 
+        jumpingStartHeight = cart.y;
     }
-    if (!cart.onTrack && spacePressed && jumping && performance.now() - jumpStart < 100) {
+
+    if (jumpingStartHeight - cart.y > canvas.height / 8) {
+        forceFall = true;
+    }
+
+    if (!forceFall && !cart.onTrack && spacePressed && jumping) {
         if (cart.dy > -maxVerticalSpeed) {
-            cart.dy -= 2;
+            cart.dy -= canvas.height / 400 - (0.5 * cart.dy);
         }
         else {
             cart.dy = -maxVerticalSpeed;
@@ -86,7 +91,7 @@ function update() {
 
     // Move track segments
     for (let segment of trackSegments) {
-        segment.x -= 3;
+        segment.x -= canvas.width / 200;
     }
 
     // Remove the leftmost segment and add a new one when needed
@@ -104,6 +109,7 @@ function update() {
                 cart.y = segment.y;
                 cart.dy = 0;
                 cart.onTrack = true;
+                forceFall = false;
                 break;
         }
     }
@@ -120,8 +126,8 @@ function pushNewSegment() {
     let gapChance = Math.random();
 
     if (gapChance < 0.2) {
-        let newY = lastSegment.y + Math.random() * 100 - 50;
-        trackSegments.push({ x: lastSegment.x + (2 * segmentWidth), y: Math.max(100, Math.min(newY, 400)) });
+        let newY = lastSegment.y + Math.random() * canvas.height / 4 - canvas.height / 8;
+        trackSegments.push({ x: lastSegment.x + (2 * segmentWidth), y: Math.max(50, Math.min(newY, canvas.height - 30)) });
     } else {
         trackSegments.push({ x: lastSegment.x + segmentWidth, y: lastSegment.y });
     }
@@ -165,7 +171,7 @@ function restartGame() {
     gameOver = false;
     spacePressed = false;
     jumping = false;
-    jumpingStart = 0;
+    jumpingStartHeight = 0;
 
     // Reset track segments
     trackSegments = [];
