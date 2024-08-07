@@ -2,8 +2,8 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 let cart = {
-    x: 100,
-    y: 300,
+    x: canvas.width / 8,
+    y: canvas.height / 2,
     width: canvas.width / 40,
     height: canvas.height / 40,
     dy: 0,
@@ -24,7 +24,7 @@ let forceFall = false;
 // Initialize track segments
 for (let i = 0; i < canvas.width / segmentWidth; i++) {
     if (i < 10) {
-        trackSegments.push({ x: i * segmentWidth, y: 300 });
+        trackSegments.push({ x: i * segmentWidth, y: canvas.height / 2 });
     } else {
         pushNewSegment();
     }
@@ -155,14 +155,14 @@ function draw() {
     ctx.fillText(`Score: ${score}`, 10, 20);
 
     if (gameOver) {
-        ctx.fillText('Game Over - Press Space to Restart', 300, 200);
+        ctx.fillText('Game Over - Press Space to Restart', canvas.height / 2, 200);
     }
 }
 
 function restartGame() {
     // Reset cart position and state
-    cart.x = 50;
-    cart.y = 300;
+    cart.x = canvas.width / 8;
+    cart.y = canvas.height / 2;
     cart.dy = 0;
     cart.onTrack = true;
 
